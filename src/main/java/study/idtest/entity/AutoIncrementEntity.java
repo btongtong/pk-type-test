@@ -1,11 +1,7 @@
 package study.idtest.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "auto_increment_entity")
 public class AutoIncrementEntity {
@@ -19,5 +15,9 @@ public class AutoIncrementEntity {
 
     public AutoIncrementEntity(int seq) {
         this.seq = seq;
+    }
+
+    public Long getId() {
+        return id;
     }
 }

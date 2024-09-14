@@ -14,8 +14,9 @@ public class AutoIncrementService {
     }
 
     @Transactional
-    public void insert(int seq) {
+    public Long insert(int seq) {
         AutoIncrementEntity entity = new AutoIncrementEntity(seq);
-        autoIncrementRepository.save(entity);
+        entity = autoIncrementRepository.save(entity);
+        return entity.getId();
     }
 }

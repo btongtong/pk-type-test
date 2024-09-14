@@ -14,8 +14,9 @@ public class UuidService {
     }
 
     @Transactional
-    public void insert(int seq) {
+    public String insert(int seq) {
         UuidEntity entity = new UuidEntity(seq);
-        uuidRepository.save(entity);
+        entity = uuidRepository.save(entity);
+        return entity.getId();
     }
 }

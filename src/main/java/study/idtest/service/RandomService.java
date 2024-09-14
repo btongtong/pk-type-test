@@ -14,8 +14,9 @@ public class RandomService {
     }
 
     @Transactional
-    public void insert(int seq) {
+    public Long insert(int seq) {
         RandomEntity entity = new RandomEntity(seq);
-        randomRepository.save(entity);
+        entity = randomRepository.save(entity);
+        return entity.getId();
     }
 }

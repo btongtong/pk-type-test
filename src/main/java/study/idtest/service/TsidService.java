@@ -14,8 +14,9 @@ public class TsidService {
     }
 
     @Transactional
-    public void insert(int seq) {
+    public Long insert(int seq) {
         TsidEntity entity = new TsidEntity(seq);
-        tsidRepository.save(entity);
+        entity = tsidRepository.save(entity);
+        return entity.getId();
     }
 }

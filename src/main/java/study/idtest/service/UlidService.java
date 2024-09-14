@@ -14,8 +14,9 @@ public class UlidService {
     }
 
     @Transactional
-    public void insert(int seq) {
+    public String insert(int seq) {
         UlidEntity entity = new UlidEntity(seq);
-        ulidRepository.save(entity);
+        entity = ulidRepository.save(entity);
+        return entity.getId();
     }
 }
