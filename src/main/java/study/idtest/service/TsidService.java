@@ -19,4 +19,9 @@ public class TsidService {
         entity = tsidRepository.save(entity);
         return entity.getId();
     }
+
+    @Transactional
+    public TsidEntity select (Long id) {
+        return tsidRepository.findById(id).orElseThrow(IllegalArgumentException::new);
+    }
 }

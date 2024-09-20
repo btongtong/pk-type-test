@@ -19,4 +19,9 @@ public class AutoIncrementService {
         entity = autoIncrementRepository.save(entity);
         return entity.getId();
     }
+
+    @Transactional
+    public AutoIncrementEntity select(Long id) {
+        return autoIncrementRepository.findById(id).orElseThrow(IllegalArgumentException::new);
+    }
 }

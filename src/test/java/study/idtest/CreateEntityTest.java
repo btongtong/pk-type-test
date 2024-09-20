@@ -14,8 +14,8 @@ import java.util.function.Consumer;
 @SpringBootTest
 class CreateEntityTest {
 
-    private static final int USER_COUNT = 100000;
-    private static final int THREAD_POOL_SIZE = 1000;
+    private static final int USER_COUNT = 1000000;
+    private static final int THREAD_POOL_SIZE = 12;
 
     @Test
     public void testIdStrategyPerformance() throws Exception {

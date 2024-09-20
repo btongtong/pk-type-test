@@ -7,14 +7,10 @@ import study.idtest.service.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
 @SpringBootTest
-class InsertTests {
-
+public class InsertTests1 {
     @Autowired
     private AutoIncrementService autoIncrementService;
     @Autowired
@@ -27,19 +23,14 @@ class InsertTests {
     private UuidService uuidService;
 
     private static final int USER_COUNT = 1000000;
-    private static final int THREAD_POOL_SIZE = 12;
 
     @Test
     public void testIdStrategyPerformance() throws Exception {
-        ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
-
-        long autoIncrementTime = runTest(executorService, this::insertAutoIncrement);
-        long randomTime = runTest(executorService, this::insertRandom);
-        long tsidTime = runTest(executorService, this::insertTsid);
-        long ulidTime = runTest(executorService, this::insertUlid);
-        long uuidTime = runTest(executorService, this::insertUuid);
-
-        executorService.shutdown();
+        long autoIncrementTime = runTest(this::insertAutoIncrement);
+        long randomTime = runTest(this::insertRandom);
+        long tsidTime = runTest(this::insertTsid);
+        long ulidTime = runTest(this::insertUlid);
+        long uuidTime = runTest(this::insertUuid);
 
         System.out.println("Auto increment time: " + autoIncrementTime + "ms");
         System.out.println("Random time: " + randomTime + "ms");
@@ -48,17 +39,20 @@ class InsertTests {
         System.out.println("Uuid time: " + uuidTime + "ms");
     }
 
-    private long runTest(ExecutorService executorService, Consumer<Integer> insertMethod) throws Exception {
+    private long runTest(Consumer<Integer> insertMethod) throws Exception {
         long startTime = System.currentTimeMillis();
 
-        List<Future<?>> futures = new ArrayList<>();
-        for(int i = 0; i < USER_COUNT; i++) {
+        List<Thread> threads = new ArrayList<>();
+
+        for (int i = 0; i < USER_COUNT; i++) {
             final int seq = i;
-            futures.add(executorService.submit(() -> insertMethod.accept(seq)));
+            Thread thread = new Thread(() -> insertMethod.accept(seq));
+            threads.add(thread);
+            thread.start();
         }
 
-        for(Future<?> future : futures) {
-            future.get();
+        for (Thread thread : threads) {
+            thread.join();
         }
 
         return System.currentTimeMillis() - startTime;
@@ -83,5 +77,4 @@ class InsertTests {
     private void insertUuid(int seq) {
         uuidService.insert(seq);
     }
-
 }

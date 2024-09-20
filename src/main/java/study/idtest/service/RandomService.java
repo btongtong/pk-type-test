@@ -19,4 +19,9 @@ public class RandomService {
         entity = randomRepository.save(entity);
         return entity.getId();
     }
+
+    @Transactional
+    public RandomEntity select(Long id) {
+        return randomRepository.findById(id).orElseThrow(IllegalArgumentException::new);
+    }
 }

@@ -19,4 +19,9 @@ public class UlidService {
         entity = ulidRepository.save(entity);
         return entity.getId();
     }
+
+    @Transactional
+    public UlidEntity select(String id) {
+        return ulidRepository.findById(id).orElseThrow(IllegalArgumentException::new);
+    }
 }
