@@ -5,6 +5,8 @@ import org.springframework.transaction.annotation.Transactional;
 import study.idtest.entity.TsidEntity;
 import study.idtest.repository.TsidRepository;
 
+import java.util.List;
+
 @Service
 public class TsidService {
     private final TsidRepository tsidRepository;
@@ -18,6 +20,11 @@ public class TsidService {
         TsidEntity entity = new TsidEntity(seq);
         entity = tsidRepository.save(entity);
         return entity.getId();
+    }
+
+    @Transactional
+    public List<Long> selectRandomIds(int count) {
+        return tsidRepository.findRandomIds(count);
     }
 
     @Transactional

@@ -1,10 +1,8 @@
 package study.idtest;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import study.idtest.entity.*;
 import study.idtest.service.*;
 
 import java.util.ArrayList;
@@ -36,75 +34,78 @@ public class SelectTests {
     private List<String> ulidIds;
     private List<String> uuidIds;
 
-    @BeforeEach
-    void setup() {
-        autoIncrementIds = new ArrayList<>();
-        randomIds = new ArrayList<>();
-        tsidIds = new ArrayList<>();
-        ulidIds = new ArrayList<>();
-        uuidIds = new ArrayList<>();
+    @Test
+    public void testAutoIncrementSelectPerformance() throws Exception {
+        autoIncrementIds = autoIncrementService.selectRandomIds(SELECT_COUNT);
+        System.out.println("Auto Increment IDs: " + autoIncrementIds.size());
 
-        for (int i = 0; i < SELECT_COUNT; i++) {
-            autoIncrementIds.add(autoIncrementService.insert(i));
-            randomIds.add(randomService.insert(i));
-            tsidIds.add(tsidService.insert(i));
-            ulidIds.add(ulidService.insert(i));
-            uuidIds.add(uuidService.insert(i));
-        }
+        ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+        long autoIncrementSelectTime = runTest(executorService, id -> autoIncrementService.select(id), autoIncrementIds);
+        executorService.shutdown();
+
+        System.out.println("Auto increment select time: " + autoIncrementSelectTime + "ms");
     }
 
     @Test
-    public void testIdStrategySelectPerformance() throws Exception {
+    public void testRandomSelectPerformance() throws Exception {
+        randomIds = randomService.selectRandomIds(SELECT_COUNT);
+        System.out.println("Random IDs: " + randomIds.size());
+
         ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
-
-        long autoIncrementSelectTime = runTest(executorService, this::selectAutoIncrement, autoIncrementIds);
-        long randomSelectTime = runTest(executorService, this::selectRandom, randomIds);
-        long tsidSelectTime = runTest(executorService, this::selectTsid, tsidIds);
-        long ulidSelectTime = runTest(executorService, this::selectUlid, ulidIds);
-        long uuidSelectTime = runTest(executorService, this::selectUuid, uuidIds);
-
+        long randomSelectTime = runTest(executorService, id -> randomService.select(id), randomIds);
         executorService.shutdown();
 
-        System.out.println("Select Performance:");
-        System.out.println("Auto increment time: " + autoIncrementSelectTime + "ms");
-        System.out.println("Random time: " + randomSelectTime + "ms");
-        System.out.println("Tsid time: " + tsidSelectTime + "ms");
-        System.out.println("Ulid time: " + ulidSelectTime + "ms");
-        System.out.println("Uuid time: " + uuidSelectTime + "ms");
+        System.out.println("Random select time: " + randomSelectTime + "ms");
+    }
+
+    @Test
+    public void testTsidSelectPerformance() throws Exception {
+        tsidIds = tsidService.selectRandomIds(SELECT_COUNT);
+        System.out.println("TSID IDs: " + tsidIds.size());
+
+        ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+        long tsidSelectTime = runTest(executorService, id -> tsidService.select(id), tsidIds);
+        executorService.shutdown();
+
+        System.out.println("TSID select time: " + tsidSelectTime + "ms");
+    }
+
+    @Test
+    public void testUlidSelectPerformance() throws Exception {
+        ulidIds = ulidService.selectRandomIds(SELECT_COUNT);
+        System.out.println("ULID IDs: " + ulidIds.size());
+
+        ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+        long ulidSelectTime = runTest(executorService, id -> ulidService.select(id), ulidIds);
+        executorService.shutdown();
+
+        System.out.println("ULID select time: " + ulidSelectTime + "ms");
+    }
+
+    @Test
+    public void testUuidSelectPerformance() throws Exception {
+        uuidIds = uuidService.selectRandomIds(SELECT_COUNT);
+        System.out.println("UUID IDs: " + uuidIds.size());
+
+        ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+        long uuidSelectTime = runTest(executorService, id -> uuidService.select(id), uuidIds);
+        executorService.shutdown();
+
+        System.out.println("UUID select time: " + uuidSelectTime + "ms");
     }
 
     private <T> long runTest(ExecutorService executorService, Function<T, ?> selectMethod, List<T> ids) throws Exception {
         long startTime = System.currentTimeMillis();
 
         List<Future<?>> futures = new ArrayList<>();
-        for(T id : ids) {
+        for (T id : ids) {
             futures.add(executorService.submit(() -> selectMethod.apply(id)));
         }
 
-        for(Future<?> future : futures) {
+        for (Future<?> future : futures) {
             future.get();
         }
 
         return System.currentTimeMillis() - startTime;
-    }
-
-    private AutoIncrementEntity selectAutoIncrement(Long id) {
-        return autoIncrementService.select(id);
-    }
-
-    private RandomEntity selectRandom(Long id) {
-        return randomService.select(id);
-    }
-
-    private TsidEntity selectTsid(Long id) {
-        return tsidService.select(id);
-    }
-
-    private UlidEntity selectUlid(String id) {
-        return ulidService.select(id);
-    }
-
-    private UuidEntity selectUuid(String id) {
-        return uuidService.select(id);
     }
 }

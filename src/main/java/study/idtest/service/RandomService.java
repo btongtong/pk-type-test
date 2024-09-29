@@ -5,6 +5,8 @@ import org.springframework.transaction.annotation.Transactional;
 import study.idtest.entity.RandomEntity;
 import study.idtest.repository.RandomRepository;
 
+import java.util.List;
+
 @Service
 public class RandomService {
     private final RandomRepository randomRepository;
@@ -18,6 +20,11 @@ public class RandomService {
         RandomEntity entity = new RandomEntity(seq);
         entity = randomRepository.save(entity);
         return entity.getId();
+    }
+
+    @Transactional
+    public List<Long> selectRandomIds(int count) {
+        return randomRepository.findRandomIds(count);
     }
 
     @Transactional

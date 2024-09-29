@@ -26,25 +26,46 @@ class InsertTests {
     @Autowired
     private UuidService uuidService;
 
-    private static final int USER_COUNT = 1000000;
+    private static final int USER_COUNT = 100000;
     private static final int THREAD_POOL_SIZE = 12;
 
     @Test
-    public void testIdStrategyPerformance() throws Exception {
+    public void testAutoIncrementPerformance() throws Exception {
         ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
-
-        long autoIncrementTime = runTest(executorService, this::insertAutoIncrement);
-        long randomTime = runTest(executorService, this::insertRandom);
-        long tsidTime = runTest(executorService, this::insertTsid);
-        long ulidTime = runTest(executorService, this::insertUlid);
-        long uuidTime = runTest(executorService, this::insertUuid);
-
+        long autoIncrementTime = runTest(executorService, seq -> autoIncrementService.insert(seq));
         executorService.shutdown();
-
         System.out.println("Auto increment time: " + autoIncrementTime + "ms");
+    }
+
+    @Test
+    public void testRandomPerformance() throws Exception {
+        ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+        long randomTime = runTest(executorService, seq -> randomService.insert(seq));
+        executorService.shutdown();
         System.out.println("Random time: " + randomTime + "ms");
+    }
+
+    @Test
+    public void testTsidPerformance() throws Exception {
+        ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+        long tsidTime = runTest(executorService, seq -> tsidService.insert(seq));
+        executorService.shutdown();
         System.out.println("Tsid time: " + tsidTime + "ms");
+    }
+
+    @Test
+    public void testUlidPerformance() throws Exception {
+        ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+        long ulidTime = runTest(executorService, seq -> ulidService.insert(seq));
+        executorService.shutdown();
         System.out.println("Ulid time: " + ulidTime + "ms");
+    }
+
+    @Test
+    public void testUuidPerformance() throws Exception {
+        ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+        long uuidTime = runTest(executorService, seq -> uuidService.insert(seq));
+        executorService.shutdown();
         System.out.println("Uuid time: " + uuidTime + "ms");
     }
 
@@ -52,36 +73,15 @@ class InsertTests {
         long startTime = System.currentTimeMillis();
 
         List<Future<?>> futures = new ArrayList<>();
-        for(int i = 0; i < USER_COUNT; i++) {
+        for (int i = 0; i < USER_COUNT; i++) {
             final int seq = i;
             futures.add(executorService.submit(() -> insertMethod.accept(seq)));
         }
 
-        for(Future<?> future : futures) {
+        for (Future<?> future : futures) {
             future.get();
         }
 
         return System.currentTimeMillis() - startTime;
     }
-
-    private void insertAutoIncrement(int seq) {
-        autoIncrementService.insert(seq);
-    }
-
-    private void insertRandom(int seq) {
-        randomService.insert(seq);
-    }
-
-    private void insertTsid(int seq) {
-        tsidService.insert(seq);
-    }
-
-    private void insertUlid(int seq) {
-        ulidService.insert(seq);
-    }
-
-    private void insertUuid(int seq) {
-        uuidService.insert(seq);
-    }
-
 }

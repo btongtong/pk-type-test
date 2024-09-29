@@ -5,6 +5,8 @@ import org.springframework.transaction.annotation.Transactional;
 import study.idtest.entity.AutoIncrementEntity;
 import study.idtest.repository.AutoIncrementRepository;
 
+import java.util.List;
+
 @Service
 public class AutoIncrementService {
     private final AutoIncrementRepository autoIncrementRepository;
@@ -18,6 +20,11 @@ public class AutoIncrementService {
         AutoIncrementEntity entity = new AutoIncrementEntity(seq);
         entity = autoIncrementRepository.save(entity);
         return entity.getId();
+    }
+
+    @Transactional
+    public List<Long> selectRandomIds(int count) {
+        return autoIncrementRepository.findRandomIds(count);
     }
 
     @Transactional

@@ -5,6 +5,8 @@ import org.springframework.transaction.annotation.Transactional;
 import study.idtest.entity.UuidEntity;
 import study.idtest.repository.UuidRepository;
 
+import java.util.List;
+
 @Service
 public class UuidService {
     private final UuidRepository uuidRepository;
@@ -18,6 +20,11 @@ public class UuidService {
         UuidEntity entity = new UuidEntity(seq);
         entity = uuidRepository.save(entity);
         return entity.getId();
+    }
+
+    @Transactional
+    public List<String> selectRandomIds(int count) {
+        return uuidRepository.findRandomIds(count);
     }
 
     @Transactional
